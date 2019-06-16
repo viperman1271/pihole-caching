@@ -24,6 +24,10 @@ struct queryInfo
 
     void parse(const std::string& buffer)
     {
+        data.clear();
+        sortedDomainNames.clear();
+        lastForwardPerDomain.clear();
+
         json_object* jsonObject = json_tokener_parse(buffer.c_str());
         const json_type type = json_object_get_type(jsonObject);
 

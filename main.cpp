@@ -98,7 +98,7 @@ bool fetchData(CURL* conn, const std::string& url, std::string& buffer)
     return true;
 }
 
-void runOnce(const queryInfo& queryInfo)
+void runOnce(queryInfo& queryInfo)
 {
     time_t currentTime;
     time(&currentTime);
@@ -109,12 +109,15 @@ void runOnce(const queryInfo& queryInfo)
         auto iter = queryInfo.lastForwardPerDomain.find(domainAndHitInfo.domain);
         if (iter == queryInfo.lastForwardPerDomain.end() || difftime(currentTime, iter->second) > 3600) //Assume a TTL of 1 hour
         {
+            queryInfo.lastForwardPerDomain[domainAndHitInfo.domain] = currentTime;
 #ifdef _WINDOWS_
             DNS_STATUS dnsQueryResult = DnsQuery(domainAndHitInfo.domain.c_str(), DNS_TYPE_A, DNS_QUERY_BYPASS_CACHE, nullptr, nullptr, nullptr);
             if (dnsQueryResult == 0)
             {
                 ++queriedTotal;
             }
+#elif defined(_WINDOWS_)
+            res_query(argv[1], ns_c_any, ns_t_a, nsbuf, sizeof(nsbuf));
 #else
 #error "Not implemented"
 #endif
@@ -129,11 +132,6 @@ void runOnce(const queryInfo& queryInfo)
     std::this_thread::sleep_for(std::chrono::minutes(5));
 }
 
-void constructList(std::vector<queryResult>& out_topQueriedDomains, queryInfo& in_queryInfo)
-{
-    
-}
-
 int main(int argc, char *argv[])
 {
     CURL* conn = nullptr;
@@ -146,18 +144,23 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    queryInfo queryInfo;
+    time_t lastFetchDataTime = {};
     while (shouldContinue)
     {
-        if (!fetchData(conn, url, buffer))
+        time_t now;
+        time(&now);
+
+        if(difftime(now, lastFetchDataTime) > 3600) //Only once an hour will we update the data from pi-hole
         {
-            exit(EXIT_FAILURE);
+            time(&lastFetchDataTime);
+            if (!fetchData(conn, url, buffer))
+            {
+                exit(EXIT_FAILURE);
+            }
+
+            queryInfo.parse(buffer);
         }
-
-        queryInfo queryInfo;
-        queryInfo.parse(buffer);
-
-        std::vector<queryResult> topQueriedDomains;
-        constructList(topQueriedDomains, queryInfo);
 
         runOnce(queryInfo);
     }

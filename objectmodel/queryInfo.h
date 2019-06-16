@@ -1,19 +1,33 @@
 #pragma once
 
+#include <algorithm>
 #include <assert.h>
 #include <map>
 #include <vector>
 
 struct queryInfo
 {
+    struct domainAndHitInfo
+    {
+        std::string domain;
+        unsigned int hitCount;
+    };
+
     std::vector<queryResult> data;
-    std::map<std::string, unsigned int> hitPerDomain;
+    std::vector<domainAndHitInfo> sortedDomainNames;
     std::map<std::string, time_t> lastForwardPerDomain;
+
+    static bool compareDomainAndHitInfo(const domainAndHitInfo& lhs, const domainAndHitInfo& rhs)
+    {
+        return lhs.hitCount > rhs.hitCount;
+    }
 
     void parse(const std::string& buffer)
     {
         json_object* jsonObject = json_tokener_parse(buffer.c_str());
         const json_type type = json_object_get_type(jsonObject);
+
+        std::map<std::string, unsigned int> hitPerDomain;
 
         assert(type == json_type_object);
         json_object_object_foreach(jsonObject, key, val)
@@ -45,14 +59,29 @@ struct queryInfo
                         continue;
                     }
 
-                    updateDomainHitStats(result.domain);
+                    //Only support A type for the moment
+                    if (result.type == queryDnsType::A)
+                    {
+                        updateDomainHitStats(result.domain, hitPerDomain);
+                    }
                     updateDomainLastForwardInfo(result);
                 }
             }
         }
+
+        for (std::map<std::string, unsigned int>::iterator iter = hitPerDomain.begin(); iter != hitPerDomain.end(); ++iter)
+        {
+            domainAndHitInfo info;
+            info.domain = iter->first;
+            info.hitCount = iter->second;
+
+            sortedDomainNames.push_back(info);
+        }
+
+        std::sort(sortedDomainNames.begin(), sortedDomainNames.end(), &compareDomainAndHitInfo);
     }
 
-    void updateDomainHitStats(const std::string& domain)
+    void updateDomainHitStats(const std::string& domain, std::map<std::string, unsigned int>& hitPerDomain)
     {
         std::map<std::string, unsigned int>::iterator iter = hitPerDomain.find(domain);
         if (iter == hitPerDomain.end())

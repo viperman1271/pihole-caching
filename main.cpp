@@ -8,6 +8,10 @@
 #include "objectmodel/queryResult.h"
 #include "objectmodel/queryInfo.h"
 
+#ifdef _WINDOWS_
+#include <windns.h>
+#endif // _WINDOWS_
+
 char errorBuffer[CURL_ERROR_SIZE];
 bool shouldContinue = true;
 
@@ -94,8 +98,34 @@ bool fetchData(CURL* conn, const std::string& url, std::string& buffer)
     return true;
 }
 
-void runOnce()
+void runOnce(const queryInfo& queryInfo)
 {
+    time_t currentTime;
+    time(&currentTime);
+
+    int queriedTotal = 0;
+    for (const queryInfo::domainAndHitInfo& domainAndHitInfo : queryInfo.sortedDomainNames)
+    {
+        auto iter = queryInfo.lastForwardPerDomain.find(domainAndHitInfo.domain);
+        if (iter == queryInfo.lastForwardPerDomain.end() || difftime(currentTime, iter->second) > 3600) //Assume a TTL of 1 hour
+        {
+#ifdef _WINDOWS_
+            DNS_STATUS dnsQueryResult = DnsQuery(domainAndHitInfo.domain.c_str(), DNS_TYPE_A, DNS_QUERY_BYPASS_CACHE, nullptr, nullptr, nullptr);
+            if (dnsQueryResult == 0)
+            {
+                ++queriedTotal;
+            }
+#else
+#error "Not implemented"
+#endif
+
+            if (queriedTotal >= 250) // Hardcoded limit for the time being
+            {
+                break;
+            }
+        }
+    }
+
     std::this_thread::sleep_for(std::chrono::minutes(5));
 }
 
@@ -129,7 +159,7 @@ int main(int argc, char *argv[])
         std::vector<queryResult> topQueriedDomains;
         constructList(topQueriedDomains, queryInfo);
 
-        runOnce();
+        runOnce(queryInfo);
     }
     
     cleanupConn(conn);

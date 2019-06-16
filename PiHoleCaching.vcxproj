@@ -117,6 +117,12 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="objectmodel\queryInfo.h" />
+    <ClInclude Include="objectmodel\queryResult.h" />
+    <ClInclude Include="queryAnswerType.h" />
+    <ClInclude Include="queryDnsType.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

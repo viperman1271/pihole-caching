@@ -1,7 +1,12 @@
+#include <chrono>
 #include <string>
+#include <thread>
 
 #include <curl/curl.h>
 #include <json-c/json.h>
+
+#include "objectmodel/queryResult.h"
+#include "objectmodel/queryInfo.h"
 
 char errorBuffer[CURL_ERROR_SIZE];
 bool shouldContinue = true;
@@ -15,7 +20,7 @@ int writer(char* data, size_t size, size_t nmemb, std::string* writerData)
 
     writerData->append(data, size * nmemb);
 
-    return size * nmemb;
+    return static_cast<int>(size * nmemb);
 }
 
 void cleanupConn(CURL*& conn)
@@ -89,91 +94,14 @@ bool fetchData(CURL* conn, const std::string& url, std::string& buffer)
     return true;
 }
 
-void json_parse_array(json_object *jobj, char *key) {
-    void json_parse(json_object * jobj); /*Forward Declaration*/
-    enum json_type type;
-
-    json_object *jarray = jobj; /*Simply get the array*/
-    if (key) {
-        jarray = json_object_object_get(jobj, key); /*Getting the array if it is a key value pair*/
-    }
-
-    int arraylen = json_object_array_length(jarray); /*Getting the length of the array*/
-    printf("Array Length: %dn", arraylen);
-    int i;
-    json_object * jvalue;
-
-    for (i = 0; i < arraylen; i++) {
-        jvalue = json_object_array_get_idx(jarray, i); /*Getting the array element at position i*/
-        type = json_object_get_type(jvalue);
-        if (type == json_type_array) {
-            json_parse_array(jvalue, NULL);
-        }
-        else if (type != json_type_object) {
-            printf("value[%d]: ", i);
-            //print_json_value(jvalue);
-        }
-        else {
-            json_parse(jvalue);
-        }
-    }
-}
-
-void json_parse(json_object * jobj)
-{
-
-}
-
-void parseData(const std::string& buffer)
-{
-    //Need to use json-c to parse the data
-
-    json_object * jobj = json_tokener_parse(buffer.c_str());
-    enum json_type type = json_object_get_type(jobj);
-
-
-    if (type == json_type_object)
-    {
-        json_object_object_foreach(jobj, key, val) 
-        {
-            type = json_object_get_type(val);
-            switch (type)
-            {
-            case json_type_null:
-                printf("json_type_nulln");
-                break;
-            case json_type_boolean:
-                printf("json_type_booleann");
-                break;
-            case json_type_double:
-                printf("json_type_doublen");
-                break;
-            case json_type_int:
-                printf("json_type_intn");
-                break;
-            case json_type_object:
-                printf("json_type_objectn");
-                break;
-            case json_type_array:
-                json_parse_array(jobj, key);
-                printf("json_type_arrayn");
-                break;
-            case json_type_string:
-                printf("json_type_stringn");
-                break;
-            }
-        }
-    }
-
-
-    printf("type: %u", type);
-
-    
-}
-
 void runOnce()
 {
+    std::this_thread::sleep_for(std::chrono::minutes(5));
+}
 
+void constructList(std::vector<queryResult>& out_topQueriedDomains, queryInfo& in_queryInfo)
+{
+    
 }
 
 int main(int argc, char *argv[])
@@ -195,7 +123,11 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        parseData(buffer);
+        queryInfo queryInfo;
+        queryInfo.parse(buffer);
+
+        std::vector<queryResult> topQueriedDomains;
+        constructList(topQueriedDomains, queryInfo);
 
         runOnce();
     }

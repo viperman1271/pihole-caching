@@ -122,7 +122,7 @@ void runOnce(queryInfo& queryInfo)
 #error "Not implemented"
 #endif
 
-            if (queriedTotal >= 250) // Hardcoded limit for the time being
+            if (queriedTotal >= 250) // Hard-coded limit for the time being
             {
                 break;
             }
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
     if (!curlInit(conn, url, buffer))
     {
-        fprintf(stderr, "Connection initializion failed\n");
+        fprintf(stderr, "Connection initialization failed\n");
         exit(EXIT_FAILURE);
     }
 

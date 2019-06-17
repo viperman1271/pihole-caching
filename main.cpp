@@ -116,7 +116,7 @@ void runOnce(queryInfo& queryInfo)
             {
                 ++queriedTotal;
             }
-#elif defined(_linux_)
+#elif defined(__linux__)
             res_query(argv[1], ns_c_any, ns_t_a, nsbuf, sizeof(nsbuf));
 #else
 #error "Not implemented"

@@ -19,6 +19,15 @@ configure_file (
   )
 
 add_executable(pihole-caching main.cpp queryAnswerType.h queryDnsType.h objectmodel/queryInfo.h objectmodel/queryResult.h)
+
+include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR})
+
 if(WIN32)
     target_link_libraries(pihole-caching dnsapi)
+endif()
+
+if(UNIX)
+    include(/home/mfilion/vcpkg/scripts/buildsystems/vcpkg.cmake)
+    find_package(json-c CONFIG REQUIRED)
+    target_link_libraries(pihole-caching PRIVATE json-c::json-c)
 endif()

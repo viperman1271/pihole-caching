@@ -2,6 +2,7 @@
 
 #include <string>
 #include <assert.h>
+#include <cstring>
 
 enum class queryDnsType
 {

@@ -10,6 +10,10 @@
 
 #ifdef _WINDOWS_
 #include <windns.h>
+#elif defined(__linux__)
+#include <netinet/in.h>
+#include <arpa/nameser.h>
+#include <resolv.h>
 #endif // _WINDOWS_
 
 char errorBuffer[CURL_ERROR_SIZE];
@@ -117,7 +121,8 @@ void runOnce(queryInfo& queryInfo)
                 ++queriedTotal;
             }
 #elif defined(__linux__)
-            res_query(argv[1], ns_c_any, ns_t_a, nsbuf, sizeof(nsbuf));
+	    unsigned char nsbuf[1024];
+            res_query(domainAndHitInfo.domain.c_str(), ns_c_any, ns_t_a, nsbuf, sizeof(nsbuf));
 #else
 #error "Not implemented"
 #endif

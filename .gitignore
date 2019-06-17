@@ -392,3 +392,8 @@ _deps
 
 # Generated files from CMake
 *.generated.*
+ALL_BUILD.*
+pihole-caching.sln
+pihole-caching.vcxproj
+pihole-caching.vcxproj.filters
+ZERO_CHECK.*

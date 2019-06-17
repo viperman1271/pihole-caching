@@ -19,4 +19,6 @@ configure_file (
   )
 
 add_executable(pihole-caching main.cpp queryAnswerType.h queryDnsType.h objectmodel/queryinfo.h objectmodel/queryresult.h)
-target_link_libraries(pihole-caching dnsapi)
+if(WIN32)
+    target_link_libraries(pihole-caching dnsapi)
+endif()

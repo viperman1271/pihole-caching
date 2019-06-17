@@ -397,3 +397,6 @@ pihole-caching.sln
 pihole-caching.vcxproj
 pihole-caching.vcxproj.filters
 ZERO_CHECK.*
+
+pihole-caching
+*.swp

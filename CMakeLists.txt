@@ -18,4 +18,5 @@ configure_file (
   "${PROJECT_BINARY_DIR}/pihole-caching.generated.h"
   )
 
-add_executable(pihole-caching main.cpp)
+add_executable(pihole-caching main.cpp queryAnswerType.h queryDnsType.h objectmodel/queryinfo.h objectmodel/queryresult.h)
+target_link_libraries(pihole-caching dnsapi)

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <vector> // TODO: remove
 #include <assert.h>
 
 #include "queryAnswerType.h"
@@ -13,7 +12,7 @@ struct queryResult
     queryDnsType type;
     std::string domain;
     std::string client;
-    queryAnswer queryAnswer;
+    queryAnswer answer;
 
     void parse(json_object* jsonObject)
     {
@@ -28,6 +27,6 @@ struct queryResult
         type = convertStringToQueryDnsType(json_object_get_string(json_object_array_get_idx(jsonObject, 1)));
         domain = json_object_get_string(json_object_array_get_idx(jsonObject, 2));
         client = json_object_get_string(json_object_array_get_idx(jsonObject, 3));
-        queryAnswer = convertStringToQueryAnswer(json_object_get_string(json_object_array_get_idx(jsonObject, 4)));
+        answer = convertStringToQueryAnswer(json_object_get_string(json_object_array_get_idx(jsonObject, 4)));
     }
 };

@@ -52,7 +52,7 @@ struct queryInfo
                     assert(type == json_type_array); //an object represented as an array of strings
                     queryResult result;
                     result.parse(jsonArrayEntry);
-                    switch (result.queryAnswer)
+                    switch (result.answer)
                     {
                     case queryAnswer::Cached:
                     case queryAnswer::Forwarded:

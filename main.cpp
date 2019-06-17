@@ -121,7 +121,7 @@ void runOnce(queryInfo& queryInfo)
                 ++queriedTotal;
             }
 #elif defined(__linux__)
-	    unsigned char nsbuf[1024];
+            unsigned char nsbuf[1024];
             res_query(domainAndHitInfo.domain.c_str(), ns_c_any, ns_t_a, nsbuf, sizeof(nsbuf));
 #else
 #error "Not implemented"
